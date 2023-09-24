@@ -1,103 +1,166 @@
 import { useState, useEffect } from 'react';
 import './App.css'
-import { Square } from './components/chessboard';
+import { Square } from './components/Square';
+import { Piece, Pawn, Rook, Knight, Bishop } from './components/pieces';
 
 function App() {
-  const [clickedSquare, setClickedSquare] = useState<string>("");
+  const [pieceToMove, setPieceToMove] = useState<Piece>();
   const [chessboard, setChessboard] = useState<SquareInt[]>([]);
 
   interface SquareInt {
-    piece: string,
+    piece: Piece | undefined,
     color: string,
     coordinate: string,
     selected: boolean,
+    possibleMove: boolean,
+    isEatable: boolean,
   }
 
   useEffect(() => {
+    const generateSquares = (): SquareInt[] => {
+      const chessboard: SquareInt[] = [];
+      const letters: string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
+      const colors = ["white", "black"];
+
+      for (let row = 0; row < 8; row++) {
+        const rowCoord: number = 8 - row;
+
+        letters.forEach((colLetter: string, col: number) => {
+          let piece: Piece | undefined = undefined;
+          let pieceColor: string;
+          let tileColor: string;
+          const coordinate: string = `${colLetter}${rowCoord}`;
+
+          (row + col) % 2 === 0 ? tileColor = colors[0] : tileColor = colors[1];
+          row < 4 ? pieceColor = colors[1] : pieceColor = colors[0];
+
+          // Create Pawns
+          if (row === 6 || row === 1) {
+            piece = new Pawn(pieceColor, coordinate);
+          }
+
+          // Create Bishops
+          if (coordinate === "C1" || coordinate === "C8" || coordinate === "F1" || coordinate === "F8") {
+            piece = new Bishop(pieceColor, coordinate);
+          }
+        
+          // Create Knights
+          if (coordinate === "B1" || coordinate === "B8" || coordinate === "G1" || coordinate === "G8") {
+            piece = new Knight(pieceColor, coordinate);
+          }
+
+          // Create Rooks
+          if (coordinate === "A1" || coordinate === "A8" || coordinate === "H1" || coordinate === "H8") {
+            piece = new Rook(pieceColor, coordinate);
+          }
+
+          chessboard.push({
+            piece: piece,
+            color: tileColor,
+            coordinate: coordinate,
+            selected: false,
+            possibleMove: false,
+            isEatable: false,
+          })
+        })
+      }
+
+      return chessboard;
+    }
+
     setChessboard(generateSquares());
   }, [])
 
-  // Switch pieces, reset states and square.selected
+  // Here, the state is necessarily a Piece object.
   const movePiece = (coordinate: string): void => {
-    console.log(`beggining to change piece from ${clickedSquare} to ${coordinate}`);
+    // Temporary var to save last coordinate
+    const lastCoordinate: string = pieceToMove!.coordinate;
+    pieceToMove!.coordinate = coordinate;
+
     const newChessboard = chessboard.map((square) => {
-      if (square.coordinate === clickedSquare) {
+      if (square.coordinate === coordinate || square.coordinate === lastCoordinate) {
         return {
           ...square,
-          piece: "",
+          possibleMove: false,
+          selected: false,
+          piece: square.coordinate === coordinate ? pieceToMove : undefined,
+        }
+      } else {
+        return {
+          ...square,
+          possibleMove: false,
           selected: false,
         }
       }
-      else if (square.coordinate === coordinate) {
-        return {
-          ...square,
-          piece: chessboard.find((s) => s.coordinate === clickedSquare)?.piece || "",
-        }
-      }
-      return square;
-    });
+    })
 
-    setClickedSquare("");
+    setPieceToMove(undefined);
     setChessboard(newChessboard);
   }
 
-  const setSelected = (coordinate: string): void => {
-    const newChessboard = chessboard.map((square) => {
-      if (square.coordinate === coordinate) {
+  const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
+    if (!piece) {
+      const newChessboard = chessboard.map((square) => {
         return {
           ...square,
-          selected: !square.selected,
+          selected: false,
+          isEatable: false,
+          possibleMove: false,
         }
-      }
-      return square;
-    });
+      });
+      setChessboard(newChessboard);
+      setPieceToMove(undefined);
+    } else {
+      setPieceToMove(piece);
 
-    setChessboard(newChessboard);
+      const movements = piece!.checkMoves(chessboard);
+      const newChessboard = chessboard.map((square) => {
+        if (movements?.includes(square.coordinate)) {
+          return {
+            ...square,
+            isEatable: square.piece ? true : false,
+            possibleMove: square.piece ? false : true,
+          }
+        }
+        else {
+          return {
+            ...square,
+            selected: square.coordinate === coordinate ? !square.selected : false,
+            isEatable: false,
+            possibleMove: false,
+          }
+        }
+      });
+
+      setChessboard(newChessboard);
+    }
   }
 
   const clickSquare = (coordinate: string): void => {
+    const piece: Piece | undefined = chessboard.find((s) => s.coordinate === coordinate)?.piece as Piece | undefined;
 
-    if (clickedSquare === "") {
-      setClickedSquare(coordinate);
-      setSelected(coordinate);
-    }
-    else if (clickedSquare === coordinate) {
-      setClickedSquare("");
-      setSelected(coordinate);
-    }
-    else {
-      movePiece(coordinate);
+    // If state is undefined and piece is not undefined
+    if (!pieceToMove && piece) {
+      clickChangeChessboard(piece, coordinate);
     }
 
-  }
-
-  const generateSquares = (): SquareInt[] => {
-    const chessboard: SquareInt[] = [];
-    const letters: string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
-    const colors = ["white", "black"];
-
-    for (let row = 0; row < 8; row++) {
-      const rowCoord: number = 8 - row;
-
-      letters.forEach((colLetter: string, col: number) => {
-        let color: string;
-        if ((row + col) % 2 === 0) { color = colors[0] } else { color = colors[1] }
-
-        let piece: string = "";
-        if (row === 6) { piece = "pawn" }
-
-        const coordinate: string = `${colLetter}${rowCoord}`;
-
-        chessboard.push({
-          piece: piece,
-          color: color,
-          coordinate: coordinate,
-          selected: false,
-        })
-      })
+    // If same piece is clicked again
+    else if (JSON.stringify(pieceToMove) === JSON.stringify(piece)) {
+      clickChangeChessboard(undefined, coordinate);
     }
 
-    return chessboard;
+    // If piece of same color is clicked after other, change active piece
+    else if (piece?.color === pieceToMove?.color) {
+      clickChangeChessboard(piece, coordinate);
+    }
+
+    else if (pieceToMove) {
+      const squaresToMove = pieceToMove.checkMoves(chessboard);
+      if (squaresToMove.includes(coordinate)) {
+        movePiece(coordinate);
+      }
+    }
+
   }
 
   return (

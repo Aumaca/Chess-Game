@@ -2,6 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&family=Poppins:ital@1&display=swap');
 
+:root {
+  --brown: rgb(193, 154, 107);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -22,7 +26,7 @@
   grid-template-rows: repeat(8, calc(95vw / 8));
   grid-template-columns: repeat(8, calc(95vw / 8));
   display: grid;
-  border: 5px solid black;
+  border: 5px solid var(--brown);
 }
 
 .square {
@@ -31,7 +35,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: rgb(255, 0, 0);
   box-sizing: border-box;
 }
 
@@ -45,11 +48,19 @@
 }
 
 .black {
-  background-color: black;
+  background-color: var(--brown);
+}
+
+.square.can-move {
+  background-color: rgba(9, 255, 0, 0.329);
 }
 
 .square.selected {
-  border: 4px solid rgb(255, 215, 0);
+  border: 4px solid gold;
+}
+
+.square.eatable {
+  background-color: rgb(218, 43, 30)(9, 255, 0, 0.329);
 }
 
 /* xvw - yvw = 15 */
@@ -80,7 +91,7 @@ footer p {
 
 footer a {
   text-decoration: none;
-  color: rgb(255, 215, 0);
+  color: gold;
 }
 
 @media (min-width: 576px) {
