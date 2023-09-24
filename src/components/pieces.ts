@@ -7,22 +7,63 @@ interface SquareInt {
     isEatable: boolean,
 }
 
+const isInsideBoard = (col: string, row: number): boolean => {
+    if (col.charCodeAt(0) >= 65 && col.charCodeAt(0) <= 72 && row >= 1 && row <= 8) {
+        return true;
+    }
+    return false;
+}
+
 export abstract class Piece {
     color: string;
     coordinate: string;
     abstract image: string;
+    abstract moves: [number, number][];
 
     constructor(color: string, coordinate: string) {
         this.color = color;
         this.coordinate = coordinate;
     }
 
-    abstract checkMoves(chessboard: SquareInt[]): string[];
+    checkMoves(chessboard: SquareInt[]): string[] {
+        const squaresToMove: string[] = [];
+        const col: string = this.coordinate[0];
+        const row: number = parseInt(this.coordinate[1]);
+
+        const toCheckMoves = (colDirection: number, rowDirection: number) => {
+            let tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
+            let tempRow: number = row + rowDirection;
+
+            while (isInsideBoard(tempCol, tempRow)) {
+                const coordinate = tempCol + tempRow;
+                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+                if (square.piece) {
+                    if (square.piece.color === this.color) {
+                        break;
+                    } else if (square.piece.color) {
+                        squaresToMove.push(coordinate);
+                        break;
+                    }
+                } else {
+                    squaresToMove.push(coordinate);
+                    tempCol = String.fromCharCode(tempCol.charCodeAt(0) + colDirection);
+                    tempRow += rowDirection;
+                }
+            }
+        }
+
+        this.moves.forEach((move) => {
+            toCheckMoves(move[0], move[1]);
+        })
+
+        return squaresToMove;
+    }
 }
 
 // TODO: config diagonal eating
 export class Pawn extends Piece {
     image: string;
+    moves: [number, number][] = [];
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -36,34 +77,48 @@ export class Pawn extends Piece {
     }
 
     checkMoves(chessboard: SquareInt[]): string[] {
-        let squares = 1;
         const squaresToMove: string[] = [];
+        const col: string = this.coordinate[0];
+        const row: number = parseInt(this.coordinate[1]);
+        let squares: number = 1;
 
-        // First move
-        if ((this.coordinate.includes("2") && this.color === "white") || (this.coordinate.includes("7") && this.color === "black")) {
+        if ((this.color === "white" && row === 2) || this.color === "black" && row === 7) {
             squares++;
         }
 
-        if (this.color === "white") {
-            const col = this.coordinate[0];
-            for (let x = 1; x <= squares; x++) {
-                const row = (parseInt(this.coordinate[1]) + x).toString();
-                const coordinate = col + row;
-                squaresToMove.push(coordinate);
-            }
-        } else {
-            for (let x = 1; x <= squares; x++) {
-                const row = parseInt(this.coordinate[1]) - x;
-                squaresToMove.push(`${this.coordinate[0] + row}`);
+        for (let i = 1; i <= squares; i++) {
+            let tempRow: number;
+            if (this.color === "white")
+                tempRow = row + i;
+            else
+                tempRow = row - i;
+
+            if (isInsideBoard(col, tempRow)) {
+                const coordinate = col + tempRow;
+                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+                if (square.piece)
+                    break;
+                else
+                    squaresToMove.push(coordinate);
             }
         }
-        console.log("retornando: " + squaresToMove);
+
         return squaresToMove;
     }
 }
 
 export class King extends Piece {
     image: string;
+    moves: [number, number][] = [
+        [-1, 1], // UP LEFT
+        [0, 1], // UP UP
+        [1, 1], // UP RIGHT
+        [-1, 0], // LEFT
+        [1, 0], // RIGHT
+        [-1, -1], // DOWN LEFT
+        [0, -1], // DOWN DOWN
+        [1, -1], // DOWN RIGHT
+    ]
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -78,12 +133,42 @@ export class King extends Piece {
 
     checkMoves(chessboard: SquareInt[]): string[] {
         const squaresToMove: string[] = [];
+        const col: string = this.coordinate[0];
+        const row: number = parseInt(this.coordinate[1]);
+
+        const toCheckMoves = (colDirection: number, rowDirection: number) => {
+            const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
+            const tempRow: number = row + rowDirection;
+            const coordinate = tempCol + tempRow;
+            const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+            if (square?.piece) {
+                if (!(square.piece.color === this.color))
+                    squaresToMove.push(coordinate);
+            } else {
+                squaresToMove.push(coordinate);
+            }
+        }
+
+        this.moves.forEach((move) => {
+            toCheckMoves(move[0], move[1]);
+        })
+
         return squaresToMove;
     }
 }
 
 export class Queen extends Piece {
     image: string;
+    moves: [number, number][] = [
+        [0, 1], // UP
+        [0, -1], // DOWN
+        [-1, 0], // LEFT
+        [1, 0], // RIGHT
+        [-1, 1], // UP LEFT
+        [1, 1], // UP RIGHT
+        [-1, -1], // DOWN LEFT
+        [1, -1], // DOWN RIGHT
+    ];
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -95,15 +180,16 @@ export class Queen extends Piece {
             this.image = "";
         }
     }
-
-    checkMoves(chessboard: SquareInt[]): string[] {
-        const squaresToMove: string[] = [];
-        return squaresToMove;
-    }
 }
 
 export class Bishop extends Piece {
     image: string;
+    moves: [number, number][] = [
+        [-1, 1], // UP LEFT
+        [1, 1], // UP RIGHT
+        [-1, -1], // DOWN LEFT
+        [1, -1], // DOWN RIGHT
+    ];
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -115,15 +201,20 @@ export class Bishop extends Piece {
             this.image = "";
         }
     }
-
-    checkMoves(chessboard: SquareInt[]): string[] {
-
-        return squaresToMove;
-    }
 }
 
 export class Knight extends Piece {
     image: string;
+    moves: [number, number][] = [
+        [-2, 1], // UP LEFT
+        [-1, 2], // UP LEFT
+        [2, 1], // UP RIGHT
+        [1, 2], // UP RIGHT
+        [-2, -1], // DOWN LEFT
+        [-1, -2], // DOWN LEFT
+        [2, -1], // DOWN RIGHT
+        [1, -2], // DOWN RIGHT
+    ];
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -138,46 +229,25 @@ export class Knight extends Piece {
 
     checkMoves(chessboard: SquareInt[]): string[] {
         const squaresToMove: string[] = [];
-
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
-        
-        const toCheckMove = (isUp: boolean, isLeft: boolean) => {
-            let tempCol: string = col;
-            let tempRow: number = row;
-            let coordinate: string;
-            for (let i = 1; i <= 2; i++) {
-                if (isUp) {
-                    tempRow = tempRow + 1;
-                } else {
-                    tempRow = tempRow - 1;
-                }
 
-                if (isLeft) {
-                    tempCol = i === 1 ? String.fromCharCode(col.charCodeAt(0) - 2) : String.fromCharCode(col.charCodeAt(0) - 1);
-                } else {
-                    tempCol = i === 1 ? String.fromCharCode(col.charCodeAt(0) + 2) : String.fromCharCode(col.charCodeAt(0) + 1);
-                }
-
-                if (tempRow >= 1 && tempRow <= 8 && tempCol.charCodeAt(0) >= 65 && tempCol.charCodeAt(0) <= 72) {
-                    coordinate = tempCol + tempRow;
-
-                    const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-                    if (!(square.piece?.color === this.color)) {
-                        squaresToMove.push(coordinate);
-                    }
-                }
+        const toCheckMoves = (colDirection: number, rowDirection: number) => {
+            const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
+            const tempRow: number = row + rowDirection;
+            const coordinate = tempCol + tempRow;
+            const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+            if (square?.piece) {
+                if (!(square.piece.color === this.color))
+                    squaresToMove.push(coordinate);
+            } else {
+                squaresToMove.push(coordinate);
             }
         }
 
-        // UP LEFT
-        toCheckMove(true, true);
-        // UP RIGHT
-        toCheckMove(true, false);
-        // DOWN LEFT
-        toCheckMove(false, true);
-        // DOWN RIGHT
-        toCheckMove(false, false);
+        this.moves.forEach((move) => {
+            toCheckMoves(move[0], move[1]);
+        })
 
         return squaresToMove;
     }
@@ -185,6 +255,12 @@ export class Knight extends Piece {
 
 export class Rook extends Piece {
     image: string;
+    moves: [number, number][] = [
+        [0, 1], // UP
+        [0, -1], // DOWN
+        [-1, 0], // LEFT
+        [1, 0], // RIGHT
+    ]
 
     constructor(color: string, coordinate: string) {
         super(color, coordinate);
@@ -195,51 +271,5 @@ export class Rook extends Piece {
         } else {
             this.image = "";
         }
-    }
-
-    checkMoves(chessboard: SquareInt[]): string[] {
-        const squaresToMove: string[] = [];
-        const col: string = this.coordinate[0];
-        const row: number = parseInt(this.coordinate[1]);
-
-        const toCheckMoves = (direction: string) => {
-            let tempCol: string = col;
-            let tempRow: number = row;
-            while (tempRow >= 1 && tempRow <= 8 && tempCol.charCodeAt(0) >= 65 && tempCol.charCodeAt(0) <= 72) {
-                switch (direction) {
-                    case "UP":
-                        tempRow++;
-                        break;
-                    case "DOWN":
-                        tempRow--;
-                        break;
-                    case "LEFT":
-                        tempCol = String.fromCharCode(tempCol.charCodeAt(0) - 1);
-                        break;
-                    case "RIGHT":
-                        tempCol = String.fromCharCode(tempCol.charCodeAt(0) + 1);
-                        break;
-                }
-                const coordinate = tempCol + tempRow;
-                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-                if (square?.piece) {
-                    if (square.piece.color === this.color) {
-                        break;
-                    } else if (square.piece.color) {
-                        squaresToMove.push(coordinate);
-                        break;
-                    }
-                } else {
-                    squaresToMove.push(coordinate);
-                }
-            }
-        }
-
-        toCheckMoves("UP");
-        toCheckMoves("DOWN");
-        toCheckMoves("LEFT");
-        toCheckMoves("RIGHT");
-
-        return squaresToMove;
     }
 }
