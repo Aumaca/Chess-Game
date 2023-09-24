@@ -12,14 +12,6 @@ interface SquareProps {
 
 export function Square({ onSquareClick, piece, color, selected, possibleMove, isEatable }: SquareProps): JSX.Element {
     return (
-        <div className={
-            `
-            square
-            ${color}
-            ${selected ? "selected" : ""}
-            ${possibleMove ? "can-move" : ""}
-            ${isEatable ? "eatable" : ""}
-            `
-        } onClick={onSquareClick}>{piece ? <img src={piece?.image}></img> : ""}</div>
+        <div className={`square ${color}${selected ? " selected" : ""}${possibleMove ? " can-move" : ""}${isEatable ? " eatable" : ""}`} onClick={onSquareClick}>{piece ? <img src={piece?.image}></img> : ""}</div>
     )
 }

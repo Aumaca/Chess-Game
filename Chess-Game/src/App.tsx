@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css'
 import { Square } from './components/Square';
-import { Piece, Pawn, Rook, Knight, Bishop } from './components/pieces';
+import { Piece, Pawn, Rook, Knight, Bishop, Queen, King } from './components/pieces';
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
@@ -39,11 +39,21 @@ function App() {
             piece = new Pawn(pieceColor, coordinate);
           }
 
+          // Create Kings
+          if (coordinate === "E1" || coordinate === "E8") {
+            piece = new King(pieceColor, coordinate);
+          }
+
+          // Create Queens
+          if (coordinate === "D1" || coordinate === "D8") {
+            piece = new Queen(pieceColor, coordinate);
+          }
+
           // Create Bishops
           if (coordinate === "C1" || coordinate === "C8" || coordinate === "F1" || coordinate === "F8") {
             piece = new Bishop(pieceColor, coordinate);
           }
-        
+
           // Create Knights
           if (coordinate === "B1" || coordinate === "B8" || coordinate === "G1" || coordinate === "G8") {
             piece = new Knight(pieceColor, coordinate);
@@ -72,25 +82,18 @@ function App() {
   }, [])
 
   // Here, the state is necessarily a Piece object.
+  // When piece is moved, the chessboard is reset.
   const movePiece = (coordinate: string): void => {
-    // Temporary var to save last coordinate
-    const lastCoordinate: string = pieceToMove!.coordinate;
+    const lastCoordinate: string = pieceToMove!.coordinate; // Temporary var to save last coordinate
     pieceToMove!.coordinate = coordinate;
 
     const newChessboard = chessboard.map((square) => {
-      if (square.coordinate === coordinate || square.coordinate === lastCoordinate) {
-        return {
-          ...square,
-          possibleMove: false,
-          selected: false,
-          piece: square.coordinate === coordinate ? pieceToMove : undefined,
-        }
-      } else {
-        return {
-          ...square,
-          possibleMove: false,
-          selected: false,
-        }
+      return {
+        ...square,
+        possibleMove: false,
+        selected: false,
+        piece: square.coordinate === coordinate ? pieceToMove : square.coordinate === lastCoordinate ? undefined : square.piece,
+        isEatable: false,
       }
     })
 
@@ -99,6 +102,7 @@ function App() {
   }
 
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
+    // If same piece is clicked again
     if (!piece) {
       const newChessboard = chessboard.map((square) => {
         return {
@@ -110,7 +114,8 @@ function App() {
       });
       setChessboard(newChessboard);
       setPieceToMove(undefined);
-    } else {
+    }
+    else {
       setPieceToMove(piece);
 
       const movements = piece!.checkMoves(chessboard);
@@ -154,6 +159,7 @@ function App() {
       clickChangeChessboard(piece, coordinate);
     }
 
+    // Checks if clicked square is possible to move and then move
     else if (pieceToMove) {
       const squaresToMove = pieceToMove.checkMoves(chessboard);
       if (squaresToMove.includes(coordinate)) {
