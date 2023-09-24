@@ -117,7 +117,7 @@ export class Bishop extends Piece {
     }
 
     checkMoves(chessboard: SquareInt[]): string[] {
-        const squaresToMove: string[] = [];
+
         return squaresToMove;
     }
 }
@@ -138,16 +138,14 @@ export class Knight extends Piece {
 
     checkMoves(chessboard: SquareInt[]): string[] {
         const squaresToMove: string[] = [];
+
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
-
-        let tempRow: number;
-        let tempCol: string;
-        let coordinate: string;
-
+        
         const toCheckMove = (isUp: boolean, isLeft: boolean) => {
-            tempRow = row;
-            tempCol = col;
+            let tempCol: string = col;
+            let tempRow: number = row;
+            let coordinate: string;
             for (let i = 1; i <= 2; i++) {
                 if (isUp) {
                     tempRow = tempRow + 1;
@@ -174,13 +172,10 @@ export class Knight extends Piece {
 
         // UP LEFT
         toCheckMove(true, true);
-
         // UP RIGHT
         toCheckMove(true, false);
-
         // DOWN LEFT
         toCheckMove(false, true);
-
         // DOWN RIGHT
         toCheckMove(false, false);
 
@@ -207,80 +202,44 @@ export class Rook extends Piece {
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
 
-        let tempRow: number;
-        let tempCol: string;
-
-        // UP
-        tempRow = row + 1;
-        while (tempRow <= 8) {
-            const coordinate = col + (tempRow).toString();
-            const tempSquare: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-            if (tempSquare?.piece) {
-                if (tempSquare.piece.color === this.color) {
-                    break;
-                } else if (tempSquare.piece.color) {
-                    squaresToMove.push(coordinate);
-                    break;
+        const toCheckMoves = (direction: string) => {
+            let tempCol: string = col;
+            let tempRow: number = row;
+            while (tempRow >= 1 && tempRow <= 8 && tempCol.charCodeAt(0) >= 65 && tempCol.charCodeAt(0) <= 72) {
+                switch (direction) {
+                    case "UP":
+                        tempRow++;
+                        break;
+                    case "DOWN":
+                        tempRow--;
+                        break;
+                    case "LEFT":
+                        tempCol = String.fromCharCode(tempCol.charCodeAt(0) - 1);
+                        break;
+                    case "RIGHT":
+                        tempCol = String.fromCharCode(tempCol.charCodeAt(0) + 1);
+                        break;
                 }
-            } else {
-                squaresToMove.push(coordinate);
+                const coordinate = tempCol + tempRow;
+                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+                if (square?.piece) {
+                    if (square.piece.color === this.color) {
+                        break;
+                    } else if (square.piece.color) {
+                        squaresToMove.push(coordinate);
+                        break;
+                    }
+                } else {
+                    squaresToMove.push(coordinate);
+                }
             }
-            tempRow++;
         }
 
-        // DOWN
-        tempRow = row - 1;
-        while (tempRow >= 1) {
-            const coordinate: string = col + (tempRow).toString();
-            const tempSquare: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-            if (tempSquare?.piece) {
-                if (tempSquare.piece.color === this.color) {
-                    break;
-                } else if (tempSquare.piece.color) {
-                    squaresToMove.push(coordinate);
-                    break;
-                }
-            } else {
-                squaresToMove.push(coordinate);
-            }
-            tempRow--;
-        }
+        toCheckMoves("UP");
+        toCheckMoves("DOWN");
+        toCheckMoves("LEFT");
+        toCheckMoves("RIGHT");
 
-        // LEFT
-        tempCol = String.fromCharCode(col.charCodeAt(0) - 1);
-        while (tempCol.charCodeAt(0) >= 65 && tempCol.charCodeAt(0) <= 72) {
-            const coordinate: string = tempCol + row;
-            const tempSquare: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-            if (tempSquare?.piece) {
-                if (tempSquare.piece.color === this.color) {
-                    break;
-                } else if (tempSquare.piece.color) {
-                    squaresToMove.push(coordinate);
-                    break;
-                }
-            } else {
-                squaresToMove.push(coordinate);
-            }
-            tempCol = String.fromCharCode(tempCol.charCodeAt(0) - 1);
-        }
-
-        // RIGHT
-        tempCol = String.fromCharCode(col.charCodeAt(0) + 1);
-        while (tempCol.charCodeAt(0) >= 65 && tempCol.charCodeAt(0) <= 72) {
-            const coordinate: string = tempCol + row;
-            const tempSquare: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
-            if (tempSquare?.piece) {
-                if (tempSquare.piece.color === this.color) {
-                    break;
-                } else if (tempSquare.piece.color) {
-                    squaresToMove.push(coordinate);
-                    break;
-                }
-            } else {
-                squaresToMove.push(coordinate);
-            }
-            tempCol = String.fromCharCode(tempCol.charCodeAt(0) + 1);
-        }
         return squaresToMove;
     }
 }
