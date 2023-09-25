@@ -60,7 +60,6 @@ export abstract class Piece {
     }
 }
 
-// TODO: config diagonal eating
 export class Pawn extends Piece {
     image: string;
     moves: [number, number][] = [];
@@ -102,6 +101,37 @@ export class Pawn extends Piece {
                     squaresToMove.push(coordinate);
             }
         }
+
+        const toCheckEatables = () => {
+            let newCol: string = String.fromCharCode(col.charCodeAt(0) - 1);
+            let newRow: number;
+            if (this.color === "white") {
+                newRow = row + 1;
+            } else {
+                newRow = row - 1;
+            }
+
+            let newCoordinate: string = newCol + newRow;
+            let square: SquareInt = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
+            if (square?.piece) {
+                squaresToMove.push(newCoordinate);
+            }
+
+            newCol = String.fromCharCode(col.charCodeAt(0) + 1);
+            if (this.color === "white") {
+                newRow = row + 1;
+            } else {
+                newRow = row - 1;
+            }
+
+            newCoordinate = newCol + newRow;
+            square = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
+            if (square?.piece) {
+                squaresToMove.push(newCoordinate);
+            }
+        }
+
+        toCheckEatables();
 
         return squaresToMove;
     }
