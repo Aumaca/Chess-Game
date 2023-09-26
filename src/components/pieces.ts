@@ -25,6 +25,10 @@ export abstract class Piece {
         this.coordinate = coordinate;
     }
 
+    getClassName() {
+        return this.constructor.name;
+    }
+
     checkMoves(chessboard: SquareInt[]): string[] {
         const squaresToMove: string[] = [];
         const col: string = this.coordinate[0];
@@ -81,9 +85,8 @@ export class Pawn extends Piece {
         const row: number = parseInt(this.coordinate[1]);
         let squares: number = 1;
 
-        if ((this.color === "white" && row === 2) || this.color === "black" && row === 7) {
+        if ((this.color === "white" && row === 2) || this.color === "black" && row === 7)
             squares++;
-        }
 
         for (let i = 1; i <= squares; i++) {
             let tempRow: number;
@@ -105,30 +108,21 @@ export class Pawn extends Piece {
         const toCheckEatables = () => {
             let newCol: string = String.fromCharCode(col.charCodeAt(0) - 1);
             let newRow: number;
-            if (this.color === "white") {
+            if (this.color === "white")
                 newRow = row + 1;
-            } else {
+            else
                 newRow = row - 1;
-            }
 
             let newCoordinate: string = newCol + newRow;
             let square: SquareInt = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
-            if (square?.piece) {
+            if (square?.piece && square?.piece.color !== this.color)
                 squaresToMove.push(newCoordinate);
-            }
 
             newCol = String.fromCharCode(col.charCodeAt(0) + 1);
-            if (this.color === "white") {
-                newRow = row + 1;
-            } else {
-                newRow = row - 1;
-            }
-
             newCoordinate = newCol + newRow;
             square = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
-            if (square?.piece) {
+            if (square?.piece && square?.piece.color !== this.color)
                 squaresToMove.push(newCoordinate);
-            }
         }
 
         toCheckEatables();

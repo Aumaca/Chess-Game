@@ -21,6 +21,51 @@
   height: 100vh;
 }
 
+.player__container {
+  width: 100%;
+  font-size: 12px;
+}
+
+.player1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  & .image_name {
+    flex-direction: row-reverse;
+  }
+
+  & .timer {
+    margin: 0px 0px 0px 20px;
+  }
+}
+
+.player2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  & .timer {
+    margin: 0px 20px 0px 0px;
+  }
+}
+
+.image_name {
+  display: flex;
+  align-items: center;
+}
+
+.timer {
+  background-color: grey;
+  height: 30px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50px;
+  color: white;
+}
+
 .chessboard {
   width: 95vw;
   grid-template-rows: repeat(8, calc(95vw / 8));
@@ -61,15 +106,11 @@
   &.eatable {
     background-color: rgb(218, 43, 30);
   }
-}
 
-/* xvw - yvw = 15 */
-.square img {
-  width: calc(70vw / 8);
-}
-
-footer {
-  display: flex;
+  & img {
+    /* xvw - yvw = 15 */
+    width: calc(70vw / 8);
+  }
 }
 
 footer {
@@ -83,15 +124,15 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-}
 
-footer p {
-  color: white;
-}
+  & p {
+    color: white;
+  }
 
-footer a {
-  text-decoration: none;
-  color: gold;
+  & a {
+    text-decoration: none;
+    color: gold;
+  }
 }
 
 @media (min-width: 576px) {
@@ -104,10 +145,10 @@ footer a {
   .square {
     width: calc(80vw / 8);
     height: calc(80vw / 8);
-  }
 
-  .square img {
-    width: calc(50vw / 8);
+    & img {
+      width: calc(50vw / 8);
+    }
   }
 }
 
@@ -121,9 +162,10 @@ footer a {
   .square {
     width: calc(700px / 8);
     height: calc(700px / 8);
+
+    & img {
+      width: calc(450px / 8);
+    }
   }
 
-  .square img {
-    width: calc(450px / 8);
-  }
 }

@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
-import './App.css'
 import { Square } from './components/Square';
 import { Piece, Pawn, Rook, Knight, Bishop, Queen, King } from './components/pieces';
+import profileImg from './imgs/profile.jpg'
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
+
+  const [playerTurn, setPlayerTurn] = useState<string>("white");
+
+  const [firstPlayerTimer, setFirstPlayerTimer] = useState<number>(60);
+  const [secondPlayerTimer, setSecondPlayerTimer] = useState<number>(60);
+
+  const [firstPlayerEatenPieces, setFirstPlayerEatenPieces] = useState<string[]>([]);
+  const [secondPlayerEatenPieces, setSecondPlayerEatenPieces] = useState<string[]>([]);
+
   const [chessboard, setChessboard] = useState<SquareInt[]>([]);
 
   interface SquareInt {
@@ -15,6 +24,23 @@ function App() {
     possibleMove: boolean,
     isEatable: boolean,
   }
+
+  // Player's timer
+  useEffect(() => {
+    if (playerTurn === "white") {
+      const interval = setInterval(() => {
+        const newFirstPlayerTimer: number = firstPlayerTimer - 1;
+        setFirstPlayerTimer(newFirstPlayerTimer);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else {
+      const interval = setInterval(() => {
+        const newSecondPLayerTime: number = secondPlayerTimer - 1;
+        setSecondPlayerTimer(newSecondPLayerTime);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [firstPlayerTimer, secondPlayerTimer, playerTurn]);
 
   useEffect(() => {
     const generateSquares = (): SquareInt[] => {
@@ -88,6 +114,20 @@ function App() {
     pieceToMove!.coordinate = coordinate;
 
     const newChessboard = chessboard.map((square) => {
+      let newEatenPieces: string[];
+      if (square.coordinate === coordinate && square?.piece) {
+        if (playerTurn === "white") {
+          newEatenPieces = firstPlayerEatenPieces;
+          newEatenPieces.push(square.piece.constructor.name);
+          console.log(newEatenPieces);
+          setFirstPlayerEatenPieces(newEatenPieces);
+        } else {
+          newEatenPieces = secondPlayerEatenPieces;
+          newEatenPieces.push(square.piece.constructor.name);
+          setSecondPlayerEatenPieces(newEatenPieces);
+        }
+      }
+
       return {
         ...square,
         possibleMove: false,
@@ -99,6 +139,10 @@ function App() {
 
     setPieceToMove(undefined);
     setChessboard(newChessboard);
+    if (pieceToMove!.color === "white")
+      setPlayerTurn("black");
+    else
+      setPlayerTurn("white");
   }
 
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
@@ -115,7 +159,7 @@ function App() {
       setChessboard(newChessboard);
       setPieceToMove(undefined);
     }
-    else {
+    else if (piece.color === playerTurn) {
       setPieceToMove(piece);
 
       const movements = piece!.checkMoves(chessboard);
@@ -172,9 +216,24 @@ function App() {
   return (
     <>
       <div className='main'>
-        <div className="player1">
-          <h2>Player 1: player12</h2>
+
+        {/** Player 2 */}
+        <div className="player__container">
+          <div className="player2">
+
+            <div className="image_name">
+              <img src={profileImg} width={"50px"} alt="" />
+              <h2>Aumaca123</h2>
+            </div>
+
+            <div className="timer">
+              <p>{secondPlayerTimer}</p>
+            </div>
+
+          </div>
         </div>
+
+        {/** Chessboard */}
         <div className="chessboard">
           {chessboard.map(((square, idx) => {
             return (
@@ -182,11 +241,27 @@ function App() {
             )
           }))}
         </div>
-        <div className="player2">
-          <h2>Player 2: player23
-          </h2>
+
+        {/** Player 1 */}
+        <div className="player__container">
+          <div className="player1">
+            <div className="timer">
+              <p>{firstPlayerTimer}</p>
+            </div>
+
+            <div className="image_name">
+              <img src={profileImg} width={"50px"} alt="" />
+              <h2>Aumaca123</h2>
+            </div>
+          </div>
+
+          <div className="eatenPieces">
+            
+          </div>
         </div>
+
       </div>
+
       <footer>
         <p>Made by <a className="text-white github-link" href="http://github.com/Aumaca"
           target="_blank" rel="noopener">Carlos Augusto🔗</a>
