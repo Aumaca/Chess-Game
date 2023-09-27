@@ -27,9 +27,12 @@
 }
 
 .player1 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+  & .data__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   & .image_name {
     flex-direction: row-reverse;
@@ -38,15 +41,29 @@
   & .timer {
     margin: 0px 0px 0px 20px;
   }
+
+  & .eaten_pieces {
+    display: flex;
+    flex-direction: row-reverse;
+    margin: 0px 12px 0px 0px;
+  }
 }
 
 .player2 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+  & .data__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   & .timer {
     margin: 0px 20px 0px 0px;
+  }
+
+  & .eaten_pieces {
+    display: flex;
+    margin: 0px 0px 0px 12px;
   }
 }
 

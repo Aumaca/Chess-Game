@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Square } from './components/Square';
 import { Piece, Pawn, Rook, Knight, Bishop, Queen, King } from './components/pieces';
+import { sortEatenPieces, toCreateInitialPieces } from './components/pieces';
 import profileImg from './imgs/profile.jpg'
 
 function App() {
@@ -42,6 +43,8 @@ function App() {
     }
   }, [firstPlayerTimer, secondPlayerTimer, playerTurn]);
 
+
+  // Generate Squares and Pieces
   useEffect(() => {
     const generateSquares = (): SquareInt[] => {
       const chessboard: SquareInt[] = [];
@@ -60,35 +63,7 @@ function App() {
           (row + col) % 2 === 0 ? tileColor = colors[0] : tileColor = colors[1];
           row < 4 ? pieceColor = colors[1] : pieceColor = colors[0];
 
-          // Create Pawns
-          if (row === 6 || row === 1) {
-            piece = new Pawn(pieceColor, coordinate);
-          }
-
-          // Create Kings
-          if (coordinate === "E1" || coordinate === "E8") {
-            piece = new King(pieceColor, coordinate);
-          }
-
-          // Create Queens
-          if (coordinate === "D1" || coordinate === "D8") {
-            piece = new Queen(pieceColor, coordinate);
-          }
-
-          // Create Bishops
-          if (coordinate === "C1" || coordinate === "C8" || coordinate === "F1" || coordinate === "F8") {
-            piece = new Bishop(pieceColor, coordinate);
-          }
-
-          // Create Knights
-          if (coordinate === "B1" || coordinate === "B8" || coordinate === "G1" || coordinate === "G8") {
-            piece = new Knight(pieceColor, coordinate);
-          }
-
-          // Create Rooks
-          if (coordinate === "A1" || coordinate === "A8" || coordinate === "H1" || coordinate === "H8") {
-            piece = new Rook(pieceColor, coordinate);
-          }
+          piece = toCreateInitialPieces(coordinate, pieceColor, row);
 
           chessboard.push({
             piece: piece,
@@ -119,12 +94,11 @@ function App() {
         if (playerTurn === "white") {
           newEatenPieces = firstPlayerEatenPieces;
           newEatenPieces.push(square.piece.constructor.name);
-          console.log(newEatenPieces);
-          setFirstPlayerEatenPieces(newEatenPieces);
+          setFirstPlayerEatenPieces(sortEatenPieces(newEatenPieces));
         } else {
           newEatenPieces = secondPlayerEatenPieces;
           newEatenPieces.push(square.piece.constructor.name);
-          setSecondPlayerEatenPieces(newEatenPieces);
+          setSecondPlayerEatenPieces(sortEatenPieces(newEatenPieces));
         }
       }
 
@@ -213,6 +187,28 @@ function App() {
 
   }
 
+  const getImageEatenPiece = (piece: string, firstPlayer: boolean): string => {
+    let image: string = "";
+    switch (piece) {
+      case "Pawn":
+        image = new Pawn(firstPlayer ? "black" : "white", "").image;
+        break
+      case "Rook":
+        image = new Rook(firstPlayer ? "black" : "white", "").image;
+        break
+      case "Knight":
+        image = new Knight(firstPlayer ? "black" : "white", "").image;
+        break
+      case "Bishop":
+        image = new Bishop(firstPlayer ? "black" : "white", "").image;
+        break
+      case "Queen":
+        image = new Queen(firstPlayer ? "black" : "white", "").image;
+        break
+    }
+    return image;
+  }
+
   return (
     <>
       <div className='main'>
@@ -221,15 +217,24 @@ function App() {
         <div className="player__container">
           <div className="player2">
 
-            <div className="image_name">
-              <img src={profileImg} width={"50px"} alt="" />
-              <h2>Aumaca123</h2>
+            <div className="eaten_pieces">
+              <p>
+                {secondPlayerEatenPieces.map((piece) => {
+                  return (<img src={getImageEatenPiece(piece, false)} width="20px" />)
+                })}
+              </p>
             </div>
 
-            <div className="timer">
-              <p>{secondPlayerTimer}</p>
-            </div>
+            <div className="data__container">
+              <div className="image_name">
+                <img src={profileImg} width={"50px"} alt="" />
+                <h2>Aumaca123</h2>
+              </div>
 
+              <div className="timer">
+                <p>{secondPlayerTimer}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -245,19 +250,26 @@ function App() {
         {/** Player 1 */}
         <div className="player__container">
           <div className="player1">
-            <div className="timer">
-              <p>{firstPlayerTimer}</p>
+            <div className='data__container'>
+              <div className="timer">
+                <p>{firstPlayerTimer}</p>
+              </div>
+
+              <div className="image_name">
+                <img src={profileImg} width={"50px"} alt="" />
+                <h2>Aumaca123</h2>
+              </div>
             </div>
 
-            <div className="image_name">
-              <img src={profileImg} width={"50px"} alt="" />
-              <h2>Aumaca123</h2>
+            <div className="eaten_pieces">
+              <p>
+                {firstPlayerEatenPieces.map((piece) => {
+                  return (<img src={getImageEatenPiece(piece, true)} width="20px" />)
+                })}
+              </p>
             </div>
           </div>
 
-          <div className="eatenPieces">
-            
-          </div>
         </div>
 
       </div>
