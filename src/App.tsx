@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Square } from './components/Square';
-import { Piece, Pawn, Rook, Knight, Bishop, Queen, King } from './components/pieces';
+import { Piece, Pawn, Rook, Knight, Bishop, Queen } from './components/pieces';
 import { sortEatenPieces, toCreateInitialPieces } from './components/pieces';
+import Capture from './sounds/Capture.mp3';
+import Move from './sounds/Move.mp3';
 import profileImg from './imgs/profile.jpg'
+import { v4 as uuidv4 } from 'uuid';
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
@@ -31,13 +34,19 @@ function App() {
     if (playerTurn === "white") {
       const interval = setInterval(() => {
         const newFirstPlayerTimer: number = firstPlayerTimer - 1;
-        setFirstPlayerTimer(newFirstPlayerTimer);
+        if (newFirstPlayerTimer >= 0)
+          setFirstPlayerTimer(newFirstPlayerTimer);
+        else
+          setFirstPlayerTimer(0);
       }, 1000);
       return () => clearInterval(interval);
     } else {
       const interval = setInterval(() => {
         const newSecondPLayerTime: number = secondPlayerTimer - 1;
-        setSecondPlayerTimer(newSecondPLayerTime);
+        if (newSecondPLayerTime >= 0)
+          setSecondPlayerTimer(newSecondPLayerTime);
+        else
+          setSecondPlayerTimer(0);
       }, 1000);
       return () => clearInterval(interval);
     }
@@ -88,9 +97,15 @@ function App() {
     const lastCoordinate: string = pieceToMove!.coordinate; // Temporary var to save last coordinate
     pieceToMove!.coordinate = coordinate;
 
+    if (chessboard.find((s) => s.coordinate === coordinate)?.piece)
+      new Audio(Capture).play();
+    else
+      new Audio(Move).play();
+
     const newChessboard = chessboard.map((square) => {
       let newEatenPieces: string[];
       if (square.coordinate === coordinate && square?.piece) {
+
         if (playerTurn === "white") {
           newEatenPieces = firstPlayerEatenPieces;
           newEatenPieces.push(square.piece.constructor.name);
@@ -220,7 +235,8 @@ function App() {
             <div className="eaten_pieces">
               <p>
                 {secondPlayerEatenPieces.map((piece) => {
-                  return (<img src={getImageEatenPiece(piece, false)} width="20px" />)
+                  const uuid = uuidv4();
+                  return (<img key={uuid} src={getImageEatenPiece(piece, false)} width="20px" />)
                 })}
               </p>
             </div>
@@ -264,7 +280,8 @@ function App() {
             <div className="eaten_pieces">
               <p>
                 {firstPlayerEatenPieces.map((piece) => {
-                  return (<img src={getImageEatenPiece(piece, true)} width="20px" />)
+                  const uuid = uuidv4();
+                  return (<img key={uuid} src={getImageEatenPiece(piece, true)} width="20px" />)
                 })}
               </p>
             </div>

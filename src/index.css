@@ -46,6 +46,7 @@
     display: flex;
     flex-direction: row-reverse;
     margin: 0px 12px 0px 0px;
+    height: 23px;
   }
 }
 
@@ -64,6 +65,7 @@
   & .eaten_pieces {
     display: flex;
     margin: 0px 0px 0px 12px;
+    height: 23px;
   }
 }
 
