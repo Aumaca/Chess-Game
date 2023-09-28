@@ -1,16 +1,25 @@
 import { useState, useEffect } from 'react';
+
 import { Square } from './components/Square';
-import { Piece, Pawn, Rook, Knight, Bishop, Queen } from './components/pieces';
-import { sortEatenPieces, toCreateInitialPieces } from './components/pieces';
+import { Piece } from './components/pieces';
+import { sortEatenPieces, generateSquares, getImageEatenPiece } from "./components/utils"
+
+import { SquareInt } from './components/interfaces';
+import { v4 as uuidv4 } from 'uuid';
+
+// Sounds
 import Capture from './sounds/Capture.mp3';
 import Move from './sounds/Move.mp3';
+
+// Images
 import profileImg from './imgs/profile.jpg'
-import { v4 as uuidv4 } from 'uuid';
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
 
   const [playerTurn, setPlayerTurn] = useState<string>("white");
+
+  const [isCheck, setIsCheck] = useState<string>("");
 
   const [firstPlayerTimer, setFirstPlayerTimer] = useState<number>(60);
   const [secondPlayerTimer, setSecondPlayerTimer] = useState<number>(60);
@@ -19,15 +28,6 @@ function App() {
   const [secondPlayerEatenPieces, setSecondPlayerEatenPieces] = useState<string[]>([]);
 
   const [chessboard, setChessboard] = useState<SquareInt[]>([]);
-
-  interface SquareInt {
-    piece: Piece | undefined,
-    color: string,
-    coordinate: string,
-    selected: boolean,
-    possibleMove: boolean,
-    isEatable: boolean,
-  }
 
   // Player's timer
   useEffect(() => {
@@ -55,39 +55,6 @@ function App() {
 
   // Generate Squares and Pieces
   useEffect(() => {
-    const generateSquares = (): SquareInt[] => {
-      const chessboard: SquareInt[] = [];
-      const letters: string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
-      const colors = ["white", "black"];
-
-      for (let row = 0; row < 8; row++) {
-        const rowCoord: number = 8 - row;
-
-        letters.forEach((colLetter: string, col: number) => {
-          let piece: Piece | undefined = undefined;
-          let pieceColor: string;
-          let tileColor: string;
-          const coordinate: string = `${colLetter}${rowCoord}`;
-
-          (row + col) % 2 === 0 ? tileColor = colors[0] : tileColor = colors[1];
-          row < 4 ? pieceColor = colors[1] : pieceColor = colors[0];
-
-          piece = toCreateInitialPieces(coordinate, pieceColor, row);
-
-          chessboard.push({
-            piece: piece,
-            color: tileColor,
-            coordinate: coordinate,
-            selected: false,
-            possibleMove: false,
-            isEatable: false,
-          })
-        })
-      }
-
-      return chessboard;
-    }
-
     setChessboard(generateSquares());
   }, [])
 
@@ -102,7 +69,7 @@ function App() {
     else
       new Audio(Move).play();
 
-    const newChessboard = chessboard.map((square) => {
+    let newChessboard = chessboard.map((square) => {
       let newEatenPieces: string[];
       if (square.coordinate === coordinate && square?.piece) {
 
@@ -124,10 +91,29 @@ function App() {
         piece: square.coordinate === coordinate ? pieceToMove : square.coordinate === lastCoordinate ? undefined : square.piece,
         isEatable: false,
       }
-    })
+    });
+
+    const newMoves: string[] | undefined = newChessboard.find((s) => s.coordinate === coordinate)?.piece?.checkMoves(newChessboard);
+    if (newMoves) {
+      newMoves.forEach((moveCoord) => {
+        const newPiece = newChessboard.find((s) => s.coordinate === moveCoord)?.piece;
+        if (newPiece && newPiece.color != playerTurn && newPiece.getClassName() === "King") {
+
+          newChessboard = newChessboard.map((square) => {
+            return {
+              ...square,
+              isEatable: square.coordinate === moveCoord ? true : false,
+            }
+          });
+
+          setIsCheck(playerTurn === "white" ? "black" : "white");
+        }
+      })
+    }
 
     setPieceToMove(undefined);
     setChessboard(newChessboard);
+
     if (pieceToMove!.color === "white")
       setPlayerTurn("black");
     else
@@ -135,13 +121,22 @@ function App() {
   }
 
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
+    // To be used in isEatable from square
+    function toCheck(square: SquareInt): boolean {
+      // If piece is king and is the same color of the checked player, so
+      if (square.piece && square.piece.getClassName() === "King" && square.piece.color === isCheck) {
+        return true;
+      }
+      return false;
+    }
+
     // If same piece is clicked again
     if (!piece) {
       const newChessboard = chessboard.map((square) => {
         return {
           ...square,
           selected: false,
-          isEatable: false,
+          isEatable: toCheck(square),
           possibleMove: false,
         }
       });
@@ -152,19 +147,21 @@ function App() {
       setPieceToMove(piece);
 
       const movements = piece!.checkMoves(chessboard);
+
+      // Change colors (isEatable, possibleMove, isSelected)
       const newChessboard = chessboard.map((square) => {
         if (movements?.includes(square.coordinate)) {
           return {
             ...square,
-            isEatable: square.piece ? true : false,
-            possibleMove: square.piece ? false : true,
+            isEatable: toCheck(square) ? true : square.piece ? true : false,
+            possibleMove: toCheck(square) ? false : square.piece ? false : true,
           }
         }
         else {
           return {
             ...square,
             selected: square.coordinate === coordinate ? !square.selected : false,
-            isEatable: false,
+            isEatable: toCheck(square),
             possibleMove: false,
           }
         }
@@ -200,28 +197,6 @@ function App() {
       }
     }
 
-  }
-
-  const getImageEatenPiece = (piece: string, firstPlayer: boolean): string => {
-    let image: string = "";
-    switch (piece) {
-      case "Pawn":
-        image = new Pawn(firstPlayer ? "black" : "white", "").image;
-        break
-      case "Rook":
-        image = new Rook(firstPlayer ? "black" : "white", "").image;
-        break
-      case "Knight":
-        image = new Knight(firstPlayer ? "black" : "white", "").image;
-        break
-      case "Bishop":
-        image = new Bishop(firstPlayer ? "black" : "white", "").image;
-        break
-      case "Queen":
-        image = new Queen(firstPlayer ? "black" : "white", "").image;
-        break
-    }
-    return image;
   }
 
   return (
