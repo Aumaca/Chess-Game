@@ -1,4 +1,4 @@
-import { isInsideBoard } from "./utils"
+import { Chessboard } from "./chessboard";
 
 interface SquareInt {
     piece: Piece | undefined,
@@ -24,7 +24,7 @@ export abstract class Piece {
         return this.constructor.name;
     }
 
-    checkMoves(chessboard: SquareInt[]): string[] {
+    checkMoves(chessboard: Chessboard): string[] {
         const squaresToMove: string[] = [];
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
@@ -34,9 +34,9 @@ export abstract class Piece {
             let tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
             let tempRow: number = row + rowDirection;
 
-            while (isInsideBoard(tempCol, tempRow)) {
+            while (chessboard.isInsideBoard(tempCol, tempRow)) {
                 const coordinate = tempCol + tempRow;
-                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+                const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
                 if (square.piece) {
                     if (square.piece.color === this.color) {
                         break;
@@ -75,7 +75,7 @@ export class Pawn extends Piece {
         }
     }
 
-    checkMoves(chessboard: SquareInt[]): string[] {
+    checkMoves(chessboard: Chessboard): string[] {
         const squaresToMove: string[] = [];
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
@@ -91,9 +91,9 @@ export class Pawn extends Piece {
             else
                 tempRow = row - i;
 
-            if (isInsideBoard(col, tempRow)) {
+            if (chessboard.isInsideBoard(col, tempRow)) {
                 const coordinate = col + tempRow;
-                const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+                const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
                 if (square.piece)
                     break;
                 else
@@ -110,13 +110,13 @@ export class Pawn extends Piece {
                 newRow = row - 1;
 
             let newCoordinate: string = newCol + newRow;
-            let square: SquareInt = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
+            let square: SquareInt = chessboard.squares.find((s) => s.coordinate === newCoordinate) as SquareInt;
             if (square?.piece && square?.piece.color !== this.color)
                 squaresToMove.push(newCoordinate);
 
             newCol = String.fromCharCode(col.charCodeAt(0) + 1);
             newCoordinate = newCol + newRow;
-            square = chessboard.find((s) => s.coordinate === newCoordinate) as SquareInt;
+            square = chessboard.squares.find((s) => s.coordinate === newCoordinate) as SquareInt;
             if (square?.piece && square?.piece.color !== this.color)
                 squaresToMove.push(newCoordinate);
         }
@@ -151,7 +151,7 @@ export class King extends Piece {
         }
     }
 
-    checkMoves(chessboard: SquareInt[]): string[] {
+    checkMoves(chessboard: Chessboard): string[] {
         const squaresToMove: string[] = [];
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
@@ -160,7 +160,7 @@ export class King extends Piece {
             const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
             const tempRow: number = row + rowDirection;
             const coordinate = tempCol + tempRow;
-            const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+            const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
             if (square?.piece) {
                 if (!(square.piece.color === this.color))
                     squaresToMove.push(coordinate);
@@ -247,7 +247,7 @@ export class Knight extends Piece {
         }
     }
 
-    checkMoves(chessboard: SquareInt[]): string[] {
+    checkMoves(chessboard: Chessboard): string[] {
         const squaresToMove: string[] = [];
         const col: string = this.coordinate[0];
         const row: number = parseInt(this.coordinate[1]);
@@ -256,7 +256,7 @@ export class Knight extends Piece {
             const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
             const tempRow: number = row + rowDirection;
             const coordinate = tempCol + tempRow;
-            const square: SquareInt = chessboard.find((s) => s.coordinate === coordinate) as SquareInt;
+            const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
             if (square?.piece) {
                 if (!(square.piece.color === this.color))
                     squaresToMove.push(coordinate);
@@ -292,4 +292,89 @@ export class Rook extends Piece {
             this.image = "";
         }
     }
+}
+
+export const getImageEatenPiece = (piece: string, firstPlayer: boolean): string => {
+    let image: string = "";
+    switch (piece) {
+        case "Pawn":
+            image = new Pawn(firstPlayer ? "black" : "white", "").image;
+            break
+        case "Rook":
+            image = new Rook(firstPlayer ? "black" : "white", "").image;
+            break
+        case "Knight":
+            image = new Knight(firstPlayer ? "black" : "white", "").image;
+            break
+        case "Bishop":
+            image = new Bishop(firstPlayer ? "black" : "white", "").image;
+            break
+        case "Queen":
+            image = new Queen(firstPlayer ? "black" : "white", "").image;
+            break
+    }
+    return image;
+}
+
+export const sortEatenPieces = (pieces: string[]): string[] => {
+    // Pawns, Knights, Bishops, Towers, Queen
+    const numberPieces: number[] = [0, 0, 0, 0, 0];
+    const newPieces: string[] = [];
+
+    pieces.map((piece: string) => {
+        switch (piece) {
+            case "Pawn":
+                numberPieces[0]++;
+                break;
+            case "Knight":
+                numberPieces[1]++;
+                break;
+            case "Bishop":
+                numberPieces[2]++;
+                break;
+            case "Tower":
+                numberPieces[3]++;
+                break;
+            case "Queen":
+                numberPieces[4]++;
+                break;
+        }
+    });
+
+    numberPieces.forEach((quant, index) => {
+        switch (index) {
+            case 0:
+                while (quant > 0) {
+                    newPieces.push("Pawn");
+                    quant--;
+                }
+                break;
+            case 1:
+                while (quant > 0) {
+                    newPieces.push("Knight");
+                    quant--;
+                }
+                break;
+            case 2:
+                while (quant > 0) {
+                    newPieces.push("Bishop");
+                    quant--;
+                }
+                break;
+            case 3:
+                while (quant > 0) {
+                    newPieces.push("Rook");
+                    quant--;
+                }
+                break;
+            case 4:
+                while (quant > 0) {
+                    newPieces.push("Queen");
+                    quant--;
+                }
+                break;
+        }
+    });
+
+    return newPieces;
 }

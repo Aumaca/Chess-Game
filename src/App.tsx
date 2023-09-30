@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { Square } from './components/Square';
-import { Piece } from './components/pieces';
-import { sortEatenPieces, generateSquares, getImageEatenPiece } from "./components/utils"
+import { Piece, sortEatenPieces, getImageEatenPiece } from './components/pieces';
 
 import { SquareInt } from './components/interfaces';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,9 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 // Sounds
 import Capture from './sounds/Capture.mp3';
 import Move from './sounds/Move.mp3';
+import Check from './sounds/Check.mp3';
 
 // Images
 import profileImg from './imgs/profile.jpg'
+import { Chessboard } from './components/chessboard';
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
@@ -27,7 +28,7 @@ function App() {
   const [firstPlayerEatenPieces, setFirstPlayerEatenPieces] = useState<string[]>([]);
   const [secondPlayerEatenPieces, setSecondPlayerEatenPieces] = useState<string[]>([]);
 
-  const [chessboard, setChessboard] = useState<SquareInt[]>([]);
+  const [chessboard, setChessboard] = useState<Chessboard>(new Chessboard());
 
   // Player's timer
   useEffect(() => {
@@ -55,7 +56,7 @@ function App() {
 
   // Generate Squares and Pieces
   useEffect(() => {
-    setChessboard(generateSquares());
+    setChessboard(new Chessboard());
   }, [])
 
   // Here, the state is necessarily a Piece object.
@@ -64,15 +65,16 @@ function App() {
     const lastCoordinate: string = pieceToMove!.coordinate; // Temporary var to save last coordinate
     pieceToMove!.coordinate = coordinate;
 
-    if (chessboard.find((s) => s.coordinate === coordinate)?.piece)
+    // Play sounds
+    if (chessboard.squares.find((s) => s.coordinate === coordinate)?.piece)
       new Audio(Capture).play();
     else
       new Audio(Move).play();
 
-    let newChessboard = chessboard.map((square) => {
+    chessboard.squares = chessboard.squares.map((square) => {
+      // Check if square to move has piece and add to eaten
       let newEatenPieces: string[];
       if (square.coordinate === coordinate && square?.piece) {
-
         if (playerTurn === "white") {
           newEatenPieces = firstPlayerEatenPieces;
           newEatenPieces.push(square.piece.constructor.name);
@@ -93,26 +95,23 @@ function App() {
       }
     });
 
-    const newMoves: string[] | undefined = newChessboard.find((s) => s.coordinate === coordinate)?.piece?.checkMoves(newChessboard);
-    if (newMoves) {
-      newMoves.forEach((moveCoord) => {
-        const newPiece = newChessboard.find((s) => s.coordinate === moveCoord)?.piece;
-        if (newPiece && newPiece.color != playerTurn && newPiece.getClassName() === "King") {
-
-          newChessboard = newChessboard.map((square) => {
-            return {
-              ...square,
-              isEatable: square.coordinate === moveCoord ? true : false,
-            }
-          });
-
-          setIsCheck(playerTurn === "white" ? "black" : "white");
+    // If check, play sound, set isEatable to King and setCheck.
+    if (chessboard.detectCheck(playerTurn)) {
+      new Audio(Check).play();
+      chessboard.squares = chessboard.squares.map((square) => {
+        if (square?.piece?.color != playerTurn && square?.piece?.getClassName() === "King") {
+          return {
+            ...square,
+            isEatable: true,
+          }
         }
-      })
+        return square;
+      });
+      setIsCheck(playerTurn === "white" ? "black" : "white");
     }
 
     setPieceToMove(undefined);
-    setChessboard(newChessboard);
+    setChessboard(chessboard);
 
     if (pieceToMove!.color === "white")
       setPlayerTurn("black");
@@ -123,16 +122,16 @@ function App() {
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
     // To be used in isEatable from square
     function toCheck(square: SquareInt): boolean {
-      // If piece is king and is the same color of the checked player, so
-      if (square.piece && square.piece.getClassName() === "King" && square.piece.color === isCheck) {
+      // If piece is king and is the same color of the checked player
+      if (square.piece && square.piece.getClassName() === "King" && square.piece.color === isCheck)
         return true;
-      }
-      return false;
+      else
+        return false;
     }
 
     // If same piece is clicked again
     if (!piece) {
-      const newChessboard = chessboard.map((square) => {
+      chessboard.squares = chessboard.squares.map((square) => {
         return {
           ...square,
           selected: false,
@@ -140,7 +139,7 @@ function App() {
           possibleMove: false,
         }
       });
-      setChessboard(newChessboard);
+      setChessboard(chessboard);
       setPieceToMove(undefined);
     }
     else if (piece.color === playerTurn) {
@@ -149,7 +148,7 @@ function App() {
       const movements = piece!.checkMoves(chessboard);
 
       // Change colors (isEatable, possibleMove, isSelected)
-      const newChessboard = chessboard.map((square) => {
+      chessboard.squares = chessboard.squares.map((square) => {
         if (movements?.includes(square.coordinate)) {
           return {
             ...square,
@@ -167,12 +166,12 @@ function App() {
         }
       });
 
-      setChessboard(newChessboard);
+      setChessboard(chessboard);
     }
   }
 
   const clickSquare = (coordinate: string): void => {
-    const piece: Piece | undefined = chessboard.find((s) => s.coordinate === coordinate)?.piece as Piece | undefined;
+    const piece: Piece | undefined = chessboard.squares.find((s) => s.coordinate === coordinate)?.piece as Piece | undefined;
 
     // If state is undefined and piece is not undefined
     if (!pieceToMove && piece) {
@@ -231,7 +230,7 @@ function App() {
 
         {/** Chessboard */}
         <div className="chessboard">
-          {chessboard.map(((square, idx) => {
+          {chessboard.squares.map(((square, idx) => {
             return (
               <Square key={idx} {...square} onSquareClick={() => clickSquare(square.coordinate)} />
             )
