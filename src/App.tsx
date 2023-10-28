@@ -132,7 +132,6 @@ function App() {
     setChessboard(chessboard);
   }
 
-  // When player click in a square
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
     // To be used in isEatable from square
     function toCheck(square: SquareInt): boolean {
@@ -142,7 +141,7 @@ function App() {
         return false;
     }
 
-    // If same piece is clicked again
+    // If same piece is clicked
     if (!piece) {
       chessboard.squares = chessboard.squares.map((square) => {
         return {
@@ -158,10 +157,8 @@ function App() {
     else if (piece.color === playerTurn) {
       setPieceToMove(piece);
 
-      // Coordinates that is possible to move
+      // Coordinates that is possible to move 
       const movements = filterMovements(chessboard, piece);
-      console.log("Movementss: ");
-      console.log(movements);
 
       // Change colors (isEatable, possibleMove, isSelected)
       chessboard.squares = chessboard.squares.map((square) => {
@@ -169,7 +166,7 @@ function App() {
           return {
             ...square,
             isEatable: toCheck(square) ? true : square.piece ? true : false,
-            possibleMove: toCheck(square) ? false : square.piece ? false : true,
+            possibleMove: true,
           }
         }
         else {
@@ -205,7 +202,7 @@ function App() {
     }
 
     // Checks if clicked square is possible to move and then move
-    else if (pieceToMove) {
+    else if (pieceToMove && chessboard.squares.find((s) => s.coordinate === coordinate)?.possibleMove) {
       const squaresToMove = pieceToMove.checkMoves(chessboard);
       if (squaresToMove.includes(coordinate)) {
         movePiece(coordinate);

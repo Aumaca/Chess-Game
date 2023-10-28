@@ -118,16 +118,25 @@ export class Chessboard {
         
         // Move piece
         newChessboard.squares = this.squares.map((square) => {
+            // Removing piece to simulate movement
+            if (square.piece?.getClassName() === piece.getClassName()) {
+                return {
+                    ...square,
+                    piece: undefined,
+                }
+            }
+
+            // Moving piece
             if (square.coordinate === coordinate) {
                 return {
                     ...square,
                     piece: piece,
                 }
             }
+
             return square;
         });
 
-        // Return detectCheck
         return newChessboard.detectCheck(piece.color);
     }
 }

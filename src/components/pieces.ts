@@ -171,7 +171,7 @@ export class King extends Piece {
 
         this.moves.forEach((move) => {
             toCheckMoves(move[0], move[1]);
-        })
+        });
 
         return squaresToMove;
     }
@@ -392,6 +392,5 @@ export const filterMovements = (chessboard: Chessboard, piece: Piece): string[] 
         }
     });
 
-    console.log(newMoves);
     return newMoves;
 }
