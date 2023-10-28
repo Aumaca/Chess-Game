@@ -378,3 +378,20 @@ export const sortEatenPieces = (pieces: string[]): string[] => {
 
     return newPieces;
 }
+
+/**
+ * Remove movements that will result a check to the own player that is moving.
+ */
+export const filterMovements = (chessboard: Chessboard, piece: Piece): string[] => {
+    const moves: string[] = piece.checkMoves(chessboard);
+    const newMoves: string[] = [];
+
+    moves.forEach((coordinate: string) => {
+        if (!chessboard.willResultInCheck(coordinate, piece)) {
+            newMoves.push(coordinate);
+        }
+    });
+
+    console.log(newMoves);
+    return newMoves;
+}

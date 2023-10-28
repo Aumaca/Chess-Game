@@ -4,11 +4,11 @@ import * as pieces from "./pieces";
 export class Chessboard {
     squares: SquareInt[] = [];
 
-    constructor() {
-        this.generateSquares();
+    constructor(isCreating?: boolean) {
+        isCreating ? this.generateSquares() : "";
     }
 
-    generateSquares(): void {
+    private generateSquares(): void {
         const chessboard: SquareInt[] = [];
         const letters: string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
         const colors = ["white", "black"];
@@ -41,7 +41,7 @@ export class Chessboard {
         this.squares = chessboard;
     }
 
-    toCreateInitialPieces(coordinate: string, color: string, row?: number): pieces.Piece {
+    private toCreateInitialPieces(coordinate: string, color: string, row?: number): pieces.Piece {
         let piece: pieces.Piece;
 
         // Create Pawns
@@ -74,25 +74,60 @@ export class Chessboard {
         return piece!;
     }
 
-    // This function appears to be horrible in performance but ok!!!!
+    // This method appears to be horrible in performance... or not.
+    /**
+     * Check if a piece from current player may be eaten by the opponent's pieces.
+     * @param {string} playerTurn
+     */
     detectCheck(playerTurn: string): boolean {
-        let check = false;
-        this.squares.map((square) => {
-            if (square?.piece && square?.piece?.color === playerTurn) {
-                square.piece.checkMoves(this).map((coord) => {
+        // For each square
+        for (const square of this.squares) {
+            // If piece is not from playerTurn
+            if (square.piece && square.piece.color !== playerTurn) {
+                // For all movements of this piece
+                for (const coord of square.piece.checkMoves(this)) {
+                    // Return true if this piece may hit the King
                     if (this.squares.find((s) => s.coordinate === coord)?.piece?.getClassName() === "King") {
-                        check = true;
+                        return true;
                     }
-                })
+                }
             }
-        })
-        return check;
+        }
+        return false;
     }
 
+    /**
+     * Check if col and row are valid/inside board.
+     * @param col - Letter
+     * @param row - Number
+     */
     isInsideBoard(col: string, row: number): boolean {
         if (col.charCodeAt(0) >= 65 && col.charCodeAt(0) <= 72 && row >= 1 && row <= 8)
             return true;
-        else
-            return false;
+        return false;
+    }
+
+    /**
+     * Creates new Chessboard object, move piece and check if
+     * the new movement will result in a check to actual player.
+     * @param coordinate
+     * @param piece
+     */
+    willResultInCheck(coordinate: string, piece: pieces.Piece): boolean {
+        const newChessboard: Chessboard = new Chessboard();
+        
+        // Move piece
+        newChessboard.squares = this.squares.map((square) => {
+            if (square.coordinate === coordinate) {
+                return {
+                    ...square,
+                    piece: piece,
+                }
+            }
+            return square;
+        });
+
+        // Return detectCheck
+        return newChessboard.detectCheck(piece.color);
     }
 }

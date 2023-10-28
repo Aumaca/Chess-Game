@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { Square } from './components/Square';
-import { Piece, sortEatenPieces, getImageEatenPiece } from './components/pieces';
+import { Piece, sortEatenPieces, getImageEatenPiece, filterMovements } from './components/pieces';
 
 import { SquareInt } from './components/interfaces';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,7 +56,7 @@ function App() {
 
   // Generate Squares and Pieces
   useEffect(() => {
-    setChessboard(new Chessboard());
+    setChessboard(new Chessboard(true));
   }, [])
 
   // Here, the state is necessarily a Piece object.
@@ -95,11 +95,25 @@ function App() {
       }
     });
 
+    let playerTurnVar: string = playerTurn;
+
+    // Change player turn
+    if (pieceToMove!.color === "white") {
+      setPlayerTurn("black");
+      playerTurnVar = "black"
+    }
+    else {
+      setPlayerTurn("white");
+      playerTurnVar = "white";
+    }
+    
     // If check, play sound, set isEatable to King and setCheck.
-    if (chessboard.detectCheck(playerTurn)) {
+    if (chessboard.detectCheck(playerTurnVar)) {
       new Audio(Check).play();
+
+      // Set isEatable to actual player king
       chessboard.squares = chessboard.squares.map((square) => {
-        if (square?.piece?.color != playerTurn && square?.piece?.getClassName() === "King") {
+        if (square?.piece?.color === playerTurnVar && square?.piece?.getClassName() === "King") {
           return {
             ...square,
             isEatable: true,
@@ -107,22 +121,21 @@ function App() {
         }
         return square;
       });
-      setIsCheck(playerTurn === "white" ? "black" : "white");
+      
+      setIsCheck(playerTurnVar);
+    } else {
+      setIsCheck("");
     }
+
 
     setPieceToMove(undefined);
     setChessboard(chessboard);
-
-    if (pieceToMove!.color === "white")
-      setPlayerTurn("black");
-    else
-      setPlayerTurn("white");
   }
 
+  // When player click in a square
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
     // To be used in isEatable from square
     function toCheck(square: SquareInt): boolean {
-      // If piece is king and is the same color of the checked player
       if (square.piece && square.piece.getClassName() === "King" && square.piece.color === isCheck)
         return true;
       else
@@ -145,7 +158,10 @@ function App() {
     else if (piece.color === playerTurn) {
       setPieceToMove(piece);
 
-      const movements = piece!.checkMoves(chessboard);
+      // Coordinates that is possible to move
+      const movements = filterMovements(chessboard, piece);
+      console.log("Movementss: ");
+      console.log(movements);
 
       // Change colors (isEatable, possibleMove, isSelected)
       chessboard.squares = chessboard.squares.map((square) => {
