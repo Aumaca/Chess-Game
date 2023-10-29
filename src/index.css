@@ -1,6 +1,6 @@
 /* Mobile First */
 
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&family=Poppins:ital@1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap');
 
 :root {
   --brown: rgb(193, 154, 107);
@@ -10,7 +10,7 @@
   margin: 0;
   padding: 0;
   border: 0;
-  font-family: 'Comfortaa', cursive;
+  font-family: 'Raleway', sans-serif;
 }
 
 .main {
@@ -26,47 +26,41 @@
   font-size: 12px;
 }
 
-.player1 {
-
-  & .data__container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  & .image_name {
-    flex-direction: row-reverse;
-  }
-
-  & .timer {
-    margin: 0px 0px 0px 20px;
-  }
-
-  & .eaten_pieces {
-    display: flex;
-    flex-direction: row-reverse;
-    margin: 0px 12px 0px 0px;
-    height: 23px;
-  }
+.player1 .data__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.player2 {
+.player1 .image_name {
+  flex-direction: row-reverse;
+}
 
-  & .data__container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.player1 .timer {
+  margin: 0px 0px 0px 20px;
+}
 
-  & .timer {
-    margin: 0px 20px 0px 0px;
-  }
+.player1 .eaten_pieces {
+  display: flex;
+  flex-direction: row-reverse;
+  margin: 0px 12px 0px 0px;
+  height: 23px;
+}
 
-  & .eaten_pieces {
-    display: flex;
-    margin: 0px 0px 0px 12px;
-    height: 23px;
-  }
+.player2 .data__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player2 .timer {
+  margin: 0px 20px 0px 0px;
+}
+
+.player2 .eaten_pieces {
+  display: flex;
+  margin: 0px 0px 0px 12px;
+  height: 23px;
 }
 
 .image_name {
@@ -100,36 +94,82 @@
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+}
 
-  &:hover {
-    filter: opacity(0.5);
-    cursor: pointer;
-  }
+.square:hover {
+  filter: opacity(0.5);
+  cursor: pointer;
+}
 
-  &.white {
-    background-color: white;
-  }
+.square.white {
+  background-color: white;
+}
 
-  &.black {
-    background-color: var(--brown);
-  }
+.square.black {
+  background-color: var(--brown);
+}
 
-  &.can-move {
-    background-color: rgba(9, 255, 0, 0.329);
-  }
+.square.can-move {
+  background-color: rgba(9, 255, 0, 0.329);
+}
 
-  &.selected {
-    border: 4px solid gold;
-  }
+.square.selected {
+  border: 4px solid gold;
+}
 
-  &.eatable {
-    background-color: rgb(218, 43, 30);
-  }
+.square.eatable {
+  background-color: rgb(218, 43, 30);
+}
 
-  & img {
-    /* xvw - yvw = 15 */
-    width: calc(70vw / 8);
-  }
+.square img {
+  /* xvw - yvw = 15 */
+  width: calc(70vw / 8);
+}
+
+.final.active {
+  display: flex;
+}
+
+.final {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  color: white;
+  text-align: center;
+  background-color: #262421;
+  width: 300px;
+  border-radius: 15px;
+  flex-direction: column;
+}
+
+.final__title {
+  padding: 20px;
+  background-color: rgba(0, 0, 0, .2);
+  border-radius: 15px;
+  
+}
+
+.final__button {
+  padding: 25px;
+}
+
+.final__button button {
+  color: white;
+  background-color: rgb(80, 200, 120);
+  padding: 20px;
+  border-radius: 10px;
+  transition: 0.2s ease-in-out;
+}
+
+.final__button button:hover {
+  cursor: pointer;
+  background-color: rgba(80, 200, 120, 0.75);
+  transform: scale(0.98);
 }
 
 footer {
@@ -143,15 +183,15 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
+}
 
-  & p {
-    color: white;
-  }
+footer p {
+  color: white;
+}
 
-  & a {
-    text-decoration: none;
-    color: gold;
-  }
+footer a {
+  text-decoration: none;
+  color: gold;
 }
 
 @media (min-width: 576px) {
@@ -164,10 +204,10 @@ footer {
   .square {
     width: calc(80vw / 8);
     height: calc(80vw / 8);
+  }
 
-    & img {
-      width: calc(50vw / 8);
-    }
+  .square img {
+    width: calc(50vw / 8);
   }
 }
 
@@ -181,10 +221,9 @@ footer {
   .square {
     width: calc(700px / 8);
     height: calc(700px / 8);
-
-    & img {
-      width: calc(450px / 8);
-    }
   }
 
+  .square img {
+    width: calc(450px / 8);
+  }
 }

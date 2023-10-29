@@ -159,6 +159,10 @@ export class King extends Piece {
         const toCheckMoves = (colDirection: number, rowDirection: number) => {
             const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
             const tempRow: number = row + rowDirection;
+
+            if (!chessboard.isInsideBoard(tempCol, tempRow))
+                return
+
             const coordinate = tempCol + tempRow;
             const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
             if (square?.piece) {
@@ -255,6 +259,10 @@ export class Knight extends Piece {
         const toCheckMoves = (colDirection: number, rowDirection: number) => {
             const tempCol: string = String.fromCharCode(col.charCodeAt(0) + colDirection);
             const tempRow: number = row + rowDirection;
+
+            if (!chessboard.isInsideBoard(tempCol, tempRow))
+                return
+
             const coordinate = tempCol + tempRow;
             const square: SquareInt = chessboard.squares.find((s) => s.coordinate === coordinate) as SquareInt;
             if (square?.piece) {

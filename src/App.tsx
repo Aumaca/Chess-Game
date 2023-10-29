@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Capture from './sounds/Capture.mp3';
 import Move from './sounds/Move.mp3';
 import Check from './sounds/Check.mp3';
+import Checkmate from './sounds/Checkmate.mp3';
 
 // Images
 import profileImg from './imgs/profile.jpg'
@@ -17,6 +18,8 @@ import { Chessboard } from './components/chessboard';
 
 function App() {
   const [pieceToMove, setPieceToMove] = useState<Piece>();
+
+  const [winner, setWinner] = useState<string>("");
 
   const [playerTurn, setPlayerTurn] = useState<string>("white");
 
@@ -58,6 +61,10 @@ function App() {
   useEffect(() => {
     setChessboard(new Chessboard(true));
   }, [])
+
+  const toggleFinalScreen = (): void => {
+    document.getElementById("final")?.classList.toggle("active");
+  }
 
   // Here, the state is necessarily a Piece object.
   // When piece is moved, the chessboard is reset.
@@ -106,10 +113,18 @@ function App() {
       setPlayerTurn("white");
       playerTurnVar = "white";
     }
-    
+
     // If check, play sound, set isEatable to King and setCheck.
     if (chessboard.detectCheck(playerTurnVar)) {
+
       new Audio(Check).play();
+
+      if (chessboard.detectCheckMate(playerTurnVar)) {
+        console.log("checkamte");
+        new Audio(Checkmate).play();
+        setWinner(playerTurnVar === "white" ? "black" : "white");
+        toggleFinalScreen();
+      }
 
       // Set isEatable to actual player king
       chessboard.squares = chessboard.squares.map((square) => {
@@ -121,7 +136,7 @@ function App() {
         }
         return square;
       });
-      
+
       setIsCheck(playerTurnVar);
     } else {
       setIsCheck("");
@@ -283,6 +298,20 @@ function App() {
           target="_blank" rel="noopener">Carlos Augusto🔗</a>
         </p>
       </footer>
+
+      {/** Final screen */}
+      <div className="final" id="final">
+        <div className="final__title">
+          <h2>Vitória das {winner === "white" ? "brancas" : "pretas"}</h2>
+          <h4>por xeque-mate</h4>
+        </div>
+
+        <div className="final__button">
+          <button onClick={() => window.location.reload()}>
+            <h2>Jogar novamente</h2>
+          </button>
+        </div>
+      </div>
     </>
   )
 }

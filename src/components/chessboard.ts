@@ -96,6 +96,53 @@ export class Chessboard {
     }
 
     /**
+     * Simulate moves of king to check if is checkmate.
+     * @param {string} checkedPlayer
+     */
+    detectCheckMate(checkedPlayer: string): boolean {
+        const kingPiece = this.squares.find((s) => s.piece?.getClassName() === "King" && s.piece.color === checkedPlayer)!.piece!;
+        console.log("Getting King piece of color: " + kingPiece.color);
+        const kingActualCoord = kingPiece!.coordinate;
+        const kingMovements: string[] = kingPiece!.checkMoves(this);
+        const newKingMovements: string[] = [];
+        let isCheckMate: boolean = false;
+
+        // To check if king can't move to any square.
+        for (const kingMove of kingMovements) {
+            if (!this.willResultInCheck(kingMove, kingActualCoord, kingPiece))
+                newKingMovements.push(kingMove);
+        }
+
+        // To check for all his pieces if a movement will change the check result in false.
+        for (const square of this.squares) {
+            // If piece is from checkedPlayer
+            if (square.piece && square.piece.color === checkedPlayer) {
+
+                // For all movements of this piece
+                const allMovements = square.piece.checkMoves(this);
+                const newAllMovements: string[] = [];
+
+                for (const coord of allMovements) {
+                    // If piece stops the check, add to new array.
+                    if (!this.willResultInCheck(coord, square.piece.coordinate, square.piece))
+                        newAllMovements.push(coord);
+                }
+
+                if (newAllMovements.length === 0) {
+                    isCheckMate = true;
+                    break;
+                }
+
+            }
+        }
+
+        if (isCheckMate && newKingMovements.length === 0)
+            console.log("checkamte");
+
+        return isCheckMate && newKingMovements.length === 0;
+    }
+
+    /**
      * Check if col and row are valid/inside board.
      * @param col - Letter
      * @param row - Number
@@ -110,16 +157,16 @@ export class Chessboard {
      * Creates new Chessboard object, move piece and check if
      * the new movement will result in a check to actual player.
      * @param coordinate
+     * @param actualCoordinate
      * @param piece
      */
     willResultInCheck(coordinate: string, actualCoordinate: string, piece: pieces.Piece): boolean {
         const newChessboard: Chessboard = new Chessboard();
-        
+
         // Move piece
         newChessboard.squares = this.squares.map((square) => {
             // Removing piece to simulate movement
             if (square.coordinate === actualCoordinate) {
-                console.log("removing " + square.piece?.getClassName() + " from " + square.coordinate);
                 return {
                     ...square,
                     piece: undefined,
