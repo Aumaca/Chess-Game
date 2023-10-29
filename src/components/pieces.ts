@@ -387,7 +387,7 @@ export const filterMovements = (chessboard: Chessboard, piece: Piece): string[] 
     const newMoves: string[] = [];
 
     moves.forEach((coordinate: string) => {
-        if (!chessboard.willResultInCheck(coordinate, piece)) {
+        if (!chessboard.willResultInCheck(coordinate, piece.coordinate, piece)) {
             newMoves.push(coordinate);
         }
     });

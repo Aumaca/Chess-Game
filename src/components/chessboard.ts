@@ -74,7 +74,6 @@ export class Chessboard {
         return piece!;
     }
 
-    // This method appears to be horrible in performance... or not.
     /**
      * Check if a piece from current player may be eaten by the opponent's pieces.
      * @param {string} playerTurn
@@ -113,13 +112,14 @@ export class Chessboard {
      * @param coordinate
      * @param piece
      */
-    willResultInCheck(coordinate: string, piece: pieces.Piece): boolean {
+    willResultInCheck(coordinate: string, actualCoordinate: string, piece: pieces.Piece): boolean {
         const newChessboard: Chessboard = new Chessboard();
         
         // Move piece
         newChessboard.squares = this.squares.map((square) => {
             // Removing piece to simulate movement
-            if (square.piece?.getClassName() === piece.getClassName()) {
+            if (square.coordinate === actualCoordinate) {
+                console.log("removing " + square.piece?.getClassName() + " from " + square.coordinate);
                 return {
                     ...square,
                     piece: undefined,
