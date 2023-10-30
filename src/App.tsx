@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { Square } from './components/Square';
 import { Piece, sortEatenPieces, getImageEatenPiece, filterMovements } from './components/pieces';
+import { Pawn, Queen } from './components/pieces';
 
 import { SquareInt } from './components/interfaces';
 import { v4 as uuidv4 } from 'uuid';
@@ -69,8 +70,20 @@ function App() {
   // Here, the state is necessarily a Piece object.
   // When piece is moved, the chessboard is reset.
   const movePiece = (coordinate: string): void => {
-    const lastCoordinate: string = pieceToMove!.coordinate; // Temporary var to save last coordinate
-    pieceToMove!.coordinate = coordinate;
+    let newPieceToMove: Piece|undefined = pieceToMove;
+
+    // Check if is Pawn reaching the opponent's base
+    if (pieceToMove?.getClassName() === "Pawn") {
+      if (pieceToMove.color === "white" && coordinate.includes("8")) {
+        newPieceToMove = new Queen(pieceToMove.color, pieceToMove.coordinate);
+      }
+      if (pieceToMove.color === "black" && coordinate.includes("1")) {
+        newPieceToMove = new Queen(pieceToMove.color, pieceToMove.coordinate);
+      }
+    }
+
+    const lastCoordinate: string = newPieceToMove!.coordinate; // Temporary var to save last coordinate
+    newPieceToMove!.coordinate = coordinate;
 
     // Play sounds
     if (chessboard.squares.find((s) => s.coordinate === coordinate)?.piece)
@@ -97,7 +110,7 @@ function App() {
         ...square,
         possibleMove: false,
         selected: false,
-        piece: square.coordinate === coordinate ? pieceToMove : square.coordinate === lastCoordinate ? undefined : square.piece,
+        piece: square.coordinate === coordinate ? newPieceToMove : square.coordinate === lastCoordinate ? undefined : square.piece,
         isEatable: false,
       }
     });
@@ -105,7 +118,7 @@ function App() {
     let playerTurnVar: string = playerTurn;
 
     // Change player turn
-    if (pieceToMove!.color === "white") {
+    if (newPieceToMove!.color === "white") {
       setPlayerTurn("black");
       playerTurnVar = "black"
     }
