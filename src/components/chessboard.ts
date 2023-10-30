@@ -159,6 +159,8 @@ export class Chessboard {
      * @param piece
      */
     willResultInCheck(coordinate: string, actualCoordinate: string, piece: pieces.Piece): boolean {
+        console.log("Running willResultInCheck()");
+
         const newChessboard: Chessboard = new Chessboard();
 
         // Move piece
