@@ -71,6 +71,8 @@ export class Chessboard {
         if (coordinate === "A1" || coordinate === "A8" || coordinate === "H1" || coordinate === "H8")
             piece = new pieces.Rook(color, coordinate);
 
+        console.log("Ppiece NAme: " + piece!.getClassName());
+
         return piece!;
     }
 
