@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { Square } from './components/Square';
 import { Piece, sortEatenPieces, getImageEatenPiece, filterMovements } from './components/pieces';
-import { Pawn, Queen } from './components/pieces';
+import { Queen } from './components/pieces';
 
 import { SquareInt } from './components/interfaces';
 import { v4 as uuidv4 } from 'uuid';
