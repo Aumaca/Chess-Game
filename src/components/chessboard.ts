@@ -105,7 +105,7 @@ export class Chessboard {
         const kingActualCoord = kingPiece!.coordinate;
         const kingMovements: string[] = kingPiece!.checkMoves(this);
         const newKingMovements: string[] = [];
-        let isCheckMate: boolean = false;
+        let isCheckMate: boolean = true;
 
         // To check if king can't move to any square.
         for (const kingMove of kingMovements) {
@@ -128,17 +128,15 @@ export class Chessboard {
                         newAllMovements.push(coord);
                 }
 
-                if (newAllMovements.length === 0) {
-                    isCheckMate = true;
+                // If there's a piece that can move to stop the check, there's no checkmate
+                if (newAllMovements.length > 0) {
+                    isCheckMate = false;
                     break;
                 }
 
             }
         }
-
-        if (isCheckMate && newKingMovements.length === 0)
-            console.log("checkamte");
-
+        
         return isCheckMate && newKingMovements.length === 0;
     }
 
