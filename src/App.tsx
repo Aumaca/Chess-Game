@@ -133,7 +133,6 @@ function App() {
       new Audio(Check).play();
 
       if (chessboard.detectCheckMate(playerTurnVar)) {
-        console.log("checkamte");
         new Audio(Checkmate).play();
         setWinner(playerTurnVar === "white" ? "black" : "white");
         toggleFinalScreen();

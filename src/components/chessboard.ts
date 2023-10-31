@@ -71,8 +71,6 @@ export class Chessboard {
         if (coordinate === "A1" || coordinate === "A8" || coordinate === "H1" || coordinate === "H8")
             piece = new pieces.Rook(color, coordinate);
 
-        console.log("Ppiece NAme: " + piece?.name);
-
         return piece!;
     }
 
@@ -103,7 +101,6 @@ export class Chessboard {
      */
     detectCheckMate(checkedPlayer: string): boolean {
         const kingPiece = this.squares.find((s) => s.piece?.name === "King" && s.piece.color === checkedPlayer)!.piece!;
-        console.log("Getting King piece of color: " + kingPiece.color);
         const kingActualCoord = kingPiece!.coordinate;
         const kingMovements: string[] = kingPiece!.checkMoves(this);
         const newKingMovements: string[] = [];
@@ -161,7 +158,6 @@ export class Chessboard {
      * @param piece
      */
     willResultInCheck(coordinate: string, actualCoordinate: string, piece: pieces.Piece): boolean {
-        console.log("Running willResultInCheck()");
 
         const newChessboard: Chessboard = new Chessboard();
 
