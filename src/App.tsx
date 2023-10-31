@@ -73,7 +73,7 @@ function App() {
     let newPieceToMove: Piece|undefined = pieceToMove;
 
     // Check if is Pawn reaching the opponent's base
-    if (pieceToMove?.getClassName() === "Pawn") {
+    if (pieceToMove?.name === "Pawn") {
       if (pieceToMove.color === "white" && coordinate.includes("8")) {
         newPieceToMove = new Queen(pieceToMove.color, pieceToMove.coordinate);
       }
@@ -141,7 +141,7 @@ function App() {
 
       // Set isEatable to actual player king
       chessboard.squares = chessboard.squares.map((square) => {
-        if (square?.piece?.color === playerTurnVar && square?.piece?.getClassName() === "King") {
+        if (square?.piece?.color === playerTurnVar && square?.piece?.name === "King") {
           return {
             ...square,
             isEatable: true,
@@ -163,7 +163,7 @@ function App() {
   const clickChangeChessboard = (piece: Piece | undefined, coordinate: string): void => {
     // To be used in isEatable from square
     function toCheck(square: SquareInt): boolean {
-      if (square.piece && square.piece.getClassName() === "King" && square.piece.color === isCheck)
+      if (square.piece && square.piece.name === "King" && square.piece.color === isCheck)
         return true;
       else
         return false;

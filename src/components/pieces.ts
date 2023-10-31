@@ -10,18 +10,16 @@ interface SquareInt {
 }
 
 export abstract class Piece {
+    name: string;
     color: string;
     coordinate: string;
     abstract image: string;
     abstract moves: [number, number][];
 
-    constructor(color: string, coordinate: string) {
+    constructor(name: string, color: string, coordinate: string) {
+        this.name = name;
         this.color = color;
         this.coordinate = coordinate;
-    }
-
-    getClassName() {
-        return this.constructor.name;
     }
 
     checkMoves(chessboard: Chessboard): string[] {
@@ -61,11 +59,13 @@ export abstract class Piece {
 }
 
 export class Pawn extends Piece {
+    static name = "Pawn";
+
     image: string;
     moves: [number, number][] = [];
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(Pawn.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/3/37/Western_white_side_Pawn.svg";
         } else if (color === "black") {
@@ -128,6 +128,8 @@ export class Pawn extends Piece {
 }
 
 export class King extends Piece {
+    static name = "King";
+
     image: string;
     moves: [number, number][] = [
         [-1, 1], // UP LEFT
@@ -141,7 +143,7 @@ export class King extends Piece {
     ]
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(King.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Western_white_side_King.svg";
         } else if (color === "black") {
@@ -182,6 +184,8 @@ export class King extends Piece {
 }
 
 export class Queen extends Piece {
+    static name = "Queen";
+
     image: string;
     moves: [number, number][] = [
         [0, 1], // UP
@@ -195,7 +199,7 @@ export class Queen extends Piece {
     ];
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(Queen.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/5/56/Western_white_side_Queen.svg";
         } else if (color === "black") {
@@ -207,6 +211,8 @@ export class Queen extends Piece {
 }
 
 export class Bishop extends Piece {
+    static name = "Bishop";
+
     image: string;
     moves: [number, number][] = [
         [-1, 1], // UP LEFT
@@ -216,7 +222,7 @@ export class Bishop extends Piece {
     ];
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(Bishop.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/a/ad/Western_white_side_Bishop.svg";
         } else if (color === "black") {
@@ -228,6 +234,8 @@ export class Bishop extends Piece {
 }
 
 export class Knight extends Piece {
+    static name = "Knight";
+
     image: string;
     moves: [number, number][] = [
         [-2, 1], // UP LEFT
@@ -241,7 +249,7 @@ export class Knight extends Piece {
     ];
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(Knight.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/c/c3/Western_white_side_Knight.svg";
         } else if (color === "black") {
@@ -282,6 +290,8 @@ export class Knight extends Piece {
 }
 
 export class Rook extends Piece {
+    static name = "Rook";
+
     image: string;
     moves: [number, number][] = [
         [0, 1], // UP
@@ -291,7 +301,7 @@ export class Rook extends Piece {
     ]
 
     constructor(color: string, coordinate: string) {
-        super(color, coordinate);
+        super(Rook.name, color, coordinate);
         if (color === "white") {
             this.image = "https://upload.wikimedia.org/wikipedia/commons/e/ed/Western_white_side_Rook.svg";
         } else if (color === "black") {
@@ -325,7 +335,7 @@ export const getImageEatenPiece = (piece: string, firstPlayer: boolean): string 
 }
 
 export const sortEatenPieces = (pieces: string[]): string[] => {
-    // Pawns, Knights, Bishops, Towers, Queen
+    // Pawns, Knights, Bishops, Rooks, Queen
     const numberPieces: number[] = [0, 0, 0, 0, 0];
     const newPieces: string[] = [];
 
@@ -340,7 +350,7 @@ export const sortEatenPieces = (pieces: string[]): string[] => {
             case "Bishop":
                 numberPieces[2]++;
                 break;
-            case "Tower":
+            case "Rook":
                 numberPieces[3]++;
                 break;
             case "Queen":

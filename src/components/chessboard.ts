@@ -42,7 +42,7 @@ export class Chessboard {
     }
 
     private toCreateInitialPieces(coordinate: string, color: string, row?: number): pieces.Piece {
-        let piece: pieces.Piece;
+        let piece: pieces.Piece | undefined = undefined;
 
         // Create Pawns
         if (row)
@@ -71,7 +71,7 @@ export class Chessboard {
         if (coordinate === "A1" || coordinate === "A8" || coordinate === "H1" || coordinate === "H8")
             piece = new pieces.Rook(color, coordinate);
 
-        console.log("Ppiece NAme: " + piece!.getClassName());
+        console.log("Ppiece NAme: " + piece?.name);
 
         return piece!;
     }
@@ -88,7 +88,7 @@ export class Chessboard {
                 // For all movements of this piece
                 for (const coord of square.piece.checkMoves(this)) {
                     // Return true if this piece may hit the King
-                    if (this.squares.find((s) => s.coordinate === coord)?.piece?.getClassName() === "King") {
+                    if (this.squares.find((s) => s.coordinate === coord)?.piece?.name === "King") {
                         return true;
                     }
                 }
@@ -102,7 +102,7 @@ export class Chessboard {
      * @param {string} checkedPlayer
      */
     detectCheckMate(checkedPlayer: string): boolean {
-        const kingPiece = this.squares.find((s) => s.piece?.getClassName() === "King" && s.piece.color === checkedPlayer)!.piece!;
+        const kingPiece = this.squares.find((s) => s.piece?.name === "King" && s.piece.color === checkedPlayer)!.piece!;
         console.log("Getting King piece of color: " + kingPiece.color);
         const kingActualCoord = kingPiece!.coordinate;
         const kingMovements: string[] = kingPiece!.checkMoves(this);
@@ -138,7 +138,7 @@ export class Chessboard {
 
             }
         }
-        
+
         return isCheckMate && newKingMovements.length === 0;
     }
 
